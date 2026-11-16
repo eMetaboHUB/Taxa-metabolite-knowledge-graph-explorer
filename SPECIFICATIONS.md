@@ -6,6 +6,17 @@
 
 Produire un **générateur** (script en ligne de commande) qui lit un fichier TSV de relations taxon ↔ molécule chimique et génère un **site web statique** autonome, sans backend, qui affiche ces relations sous forme de graphe interactif avec Cytoscape.js. Le site doit pouvoir être déployé tel quel sur GitHub Pages, GitLab Pages ou n'importe quel serveur de fichiers statiques, **et s'ouvrir par double-clic sur `index.html` (protocole `file://`)**.
 
+### 1.1 Identité de l'application
+
+**[V5]** L'application porte le nom **TaxoMetaGraph** (baseline : *Taxa–metabolite knowledge graph explorer*). Titre complet : *Public knowledge graph, associating taxa listed in the PubChem and LOTUS databases with metabolites linked to samples analysed within research projects*. Projet GitHub : `Taxa-metabolite-knowledge-graph-explorer`.
+
+Contexte du projet :
+- Projet : *Next level of reproducible, comparable and integrable Metabolomics*.
+- Work package : **WP 3, Species-specific resources**.
+- Objectif du WP : poser les bases de ressources spécifiques aux espèces, pour aider à l'interprétation des résultats de métabolomique.
+
+L'identité (nom, baseline, titre complet, dépôt GitHub, contexte) est **centralisée** dans le bloc `app` du fichier de configuration (`config.example.json`), reflété automatiquement dans `window.APP_CONFIG` (modal « À propos » du site) et documenté dans le `README.md`. Le titre de page (`<title>` et `<h1>`) porte le nom de l'application suivi de sa baseline.
+
 ## 2. Entrée : fichier TSV
 
 ### 2.1 Format

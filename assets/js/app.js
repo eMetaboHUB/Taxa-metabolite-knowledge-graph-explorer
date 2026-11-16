@@ -598,6 +598,24 @@
 
   function openAboutModal() {
     openModal("dependenciesTitle", function (mb) {
+      // Application identity
+      var app = CFG.app || {};
+      if (app.name || app.fullTitle || app.context) {
+        var ai = el("div", { className: "app-identity" });
+        if (app.name) ai.append(el("h3", { textContent: app.name }));
+        if (app.fullTitle) ai.append(el("p", { textContent: app.fullTitle }));
+        var ctx = app.context || {};
+        if (ctx.project || ctx.workPackage) {
+          var cu = el("ul");
+          if (ctx.project) cu.append(el("li", null, T("appProject") + ": " + ctx.project));
+          if (ctx.workPackage) cu.append(el("li", null, T("appWorkPackage") + ": " + ctx.workPackage));
+          if (ctx.objective) cu.append(el("li", null, T("appObjective") + ": " + ctx.objective));
+          if (app.github) cu.append(el("li", null, T("appGithub") + ": " + app.github));
+          ai.append(cu);
+        }
+        mb.append(ai);
+      }
+
       // Dependencies
       mb.append(el("h3", { textContent: T("dependenciesTitle") }),
         el("p", { className: "note", textContent: T("depNote") }));

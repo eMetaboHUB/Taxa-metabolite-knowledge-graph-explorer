@@ -19,6 +19,7 @@ body {
   border-bottom: 1px solid var(--line); background: var(--toolbar);
 }
 #toolbar h1 { font-size: 16px; margin: 0 8px 0 0; }
+#toolbar h1 .baseline { display: block; font-size: 10px; font-weight: normal; color: var(--muted); margin-top: 2px; }
 .summary { color: var(--muted); font-size: 12px; }
 #search { min-width: 230px; }
 button, input, select {
@@ -108,6 +109,11 @@ main { flex: 1; display: flex; min-height: 0; }
 .modal-box #modal-close { position: absolute; top: 12px; right: 12px; }
 .modal-box a { color: var(--accent); }
 .modal .note { color: var(--muted); font-size: 12px; }
+
+.app-identity { margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.app-identity h3 { margin: 0 0 6px; }
+.app-identity p { margin: 0 0 8px; }
+.app-identity ul { margin: 0; padding-left: 18px; }
 
 .export-btn {
   display: block; width: 100%; margin: 10px 0; padding: 14px 16px; text-align: left;

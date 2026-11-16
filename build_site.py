@@ -71,6 +71,22 @@ DEFAULT_DEPENDENCIES = [
      "file": "cose-base.js", "homepage": "https://github.com/iVis-at-Bilkent/cose-base"},
 ]
 
+# Application identity (overridable via --config "app").
+DEFAULT_APP_IDENTITY = {
+    "name": "TaxoMetaGraph",
+    "baseline": "Taxa–metabolite knowledge graph explorer",
+    "fullTitle": "Public knowledge graph, associating taxa listed in the "
+                 "PubChem and LOTUS databases with metabolites linked to "
+                 "samples analysed within research projects",
+    "github": "Taxa-metabolite-knowledge-graph-explorer",
+    "context": {
+        "project": "Next level of reproducible, comparable and integrable Metabolomics",
+        "workPackage": "WP 3, Species-specific resources",
+        "objective": "Build the foundations of species-specific resources to "
+                     "support the interpretation of metabolomics results",
+    },
+}
+
 RE_HTTP = re.compile(r"^https?://", re.IGNORECASE)
 SCRIPTS_PATTERN = re.compile(r"</script", re.IGNORECASE)
 
@@ -83,7 +99,7 @@ class Config:
         self.cfg = cfg or {}
         self.max_initial_nodes = getattr(cli, "max_initial_nodes", 0)
         self.default_layout = getattr(cli, "default_layout", "fcose")
-        self.title = getattr(cli, "title", "Taxons and molecules")
+        self.title = getattr(cli, "title", "TaxoMetaGraph")
 
     def get(self, key, default=None):
         return self.cfg.get(key, default)
@@ -307,6 +323,7 @@ def build_app_config(cli, cfg, graph):
     """Assemble window.APP_CONFIG (generation traceability + deps included)."""
     return {
         "title": cli.title,
+        "app": cfg.get("app", DEFAULT_APP_IDENTITY),
         "defaultLayout": cli.default_layout,
         "maxInitialNodes": cli.max_initial_nodes,
         "nodeSize": cfg.get("nodeSize", {"min": 10, "max": 26}),
@@ -435,7 +452,7 @@ def main(argv=None):
     )
     parser.add_argument("--input", required=True, help="TSV input file.")
     parser.add_argument("--output", default="dist", help="Output folder (default: dist).")
-    parser.add_argument("--title", default="Taxons and molecules", help="Site title.")
+    parser.add_argument("--title", default="TaxoMetaGraph", help="Site title (app name).")
     parser.add_argument("--single-file", action="store_true",
                         help="Inline all data and scripts into one index.html.")
     parser.add_argument("--max-initial-nodes", type=int, default=500,

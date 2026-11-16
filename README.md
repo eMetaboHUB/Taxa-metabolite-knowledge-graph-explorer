@@ -1,4 +1,8 @@
-# Taxon ↔ ChEBI molecule Cytoscape site generator
+# TaxoMetaGraph — Taxa–metabolite knowledge graph explorer
+
+**Public knowledge graph**, associating taxa listed in the **PubChem** and
+**LOTUS** databases with metabolites linked to samples analysed within research
+projects.
 
 A command‑line tool that reads a TSV of taxon ↔ chemical‑molecule relations and
 generates a **self‑contained static website** that displays them as an
@@ -8,6 +12,13 @@ The site works with **no backend** and **no CDN** at runtime: open
 `dist/index.html` by double‑click (protocol `file://`) or serve the folder from
 any static file server (GitHub Pages, GitLab Pages, …). Generated from
 [`SPECIFICATIONS.md`](SPECIFICATIONS.md).
+
+## Project context
+
+Part of the project **« Next level of reproducible, comparable and integrable
+Metabolomics »**, **work package WP 3 — Species‑specific resources**. The
+objective of WP 3 is to lay the foundations of **species‑specific resources**,
+to help interpret metabolomics results.
 
 ## Requirements
 
@@ -22,7 +33,7 @@ Clone / copy this repository. No `pip install` needed.
 
 ```bash
 python3 build_site.py --input relations.tsv --output dist/ \
-    [--title "Taxons and molecules"] \
+    [--title "TaxoMetaGraph"] \
     [--single-file] \
     [--max-initial-nodes 500] \
     [--default-layout fcose] \
@@ -37,7 +48,7 @@ Options:
 |---|---|---|
 | `--input` | — | Path to the TSV (required). |
 | `--output` | `dist` | Destination folder (created / emptied safely). |
-| `--title` | `Taxons and molecules` | Site title. |
+| `--title` | `TaxoMetaGraph` | Site / app title. |
 | `--single-file` | off | Inline all scripts/data/CSS into one `index.html`. |
 | `--max-initial-nodes` | `500` | Above this node count the site starts in exploration mode. |
 | `--default-layout` | `fcose` | `fcose`, `cose`, `concentric`, `circle`, `grid`, `bipartite`. |
@@ -72,6 +83,7 @@ demonstration including edge cases.
 
 `config.example.json` shows the full schema, all optional:
 
+- `app` — application identity (name, baseline, full title, GitHub repo, project context shown in the “About” dialog);
 - `urlTemplates` — external link templates for NCBI and ChEBI (`{id}` placeholder);
 - `nodeSize` — min/max node diameter (px);
 - `focusGap` — minimum center‑to‑center distance between nodes in focus mode, as a multiple of the max node diameter (default `3`, range ~2–5);

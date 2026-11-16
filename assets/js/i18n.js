@@ -70,6 +70,10 @@ window.I18N = {
   // About / dependencies
   dependenciesTitle: "About / Dependencies",
   close: "Close",
+  appProject: "Project",
+  appWorkPackage: "Work package",
+  appObjective: "Objective",
+  appGithub: "GitHub repo",
   depNote: "Versions and licences of the embedded libraries (consistent with VENDOR.md).",
   genTitle: "AI-assisted generation",
   genIntro:

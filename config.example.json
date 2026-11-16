@@ -1,4 +1,15 @@
 {
+  "app": {
+    "name": "TaxoMetaGraph",
+    "baseline": "Taxa–metabolite knowledge graph explorer",
+    "fullTitle": "Public knowledge graph, associating taxa listed in the PubChem and LOTUS databases with metabolites linked to samples analysed within research projects",
+    "github": "Taxa-metabolite-knowledge-graph-explorer",
+    "context": {
+      "project": "Next level of reproducible, comparable and integrable Metabolomics",
+      "workPackage": "WP 3, Species-specific resources",
+      "objective": "Build the foundations of species-specific resources to support the interpretation of metabolomics results"
+    }
+  },
   "urlTemplates": {
     "ncbi": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={id}",
     "chebi": "https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:{id}"

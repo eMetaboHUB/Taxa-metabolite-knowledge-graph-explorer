@@ -3,15 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>__SITE_TITLE__</title>
+<title>__SITE_TITLE__ — Taxa–metabolite knowledge graph explorer</title>
 <meta http-equiv="Content-Security-Policy" content="__SITE_CSP__">
+<meta name="description" content="Public knowledge graph, associating taxa listed in the PubChem and LOTUS databases with metabolites linked to samples analysed within research projects.">
 __SITE_HEAD_CSS__
 </head>
 <body>
 <div id="spinner" role="status" hidden><span class="spin"></span><span data-i18n="spinner"></span></div>
 
 <header id="toolbar">
-  <h1>__SITE_TITLE__</h1>
+  <h1>__SITE_TITLE__<span class="baseline">Taxa–metabolite knowledge graph explorer</span></h1>
   <span id="summary" class="summary" data-i18n="summary" data-i18n-args="taxa mols edges"></span>
   <label for="search" class="sr" data-i18n="search"></label>
   <input id="search" type="search" list="search-list" autocomplete="off" data-i18n-ph="searchPh" aria-describedby="search-hint">
