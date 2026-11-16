@@ -211,7 +211,7 @@
     return d.type === "taxon" ? showT : showM;
   }
   function degreeOk(d) { return (d.degree || 0) >= Number($("f-deg").value || 0); }
-  function relOk(e) { return !$("f-rel").value || e.data("relation") === $("f-rel").value; }
+  function relOk(e) { return true; }
 
   function neighborhoodIds(id, depth) {
     var frontier = [id], seen = {};
@@ -294,7 +294,7 @@
 
   // --- Layouts ---------------------------------------------------------------
   function runLayout(name) {
-    name = name || $("layout").value;
+    name = name || "fcose";
     var eles = visible();
     if (!eles.nodes().length) { busy(false); return; }
     if (name === "bipartite") {
@@ -333,13 +333,13 @@
         .sort(function (a, b) { return all[b].degree - all[a].degree; }).slice(0, cap - 1));
     }
     showNodes(ids);
-    runLayout($("layout").value);
+    runLayout("fcose");
   }
 
   function showAllNodes() {
     if (ALL_NODE_COUNT > (CFG.maxInitialNodes || 500) && !confirm(T("confirmAll", { N: ALL_NODE_COUNT }))) return;
     showNodes(Object.keys(all));
-    runLayout($("layout").value);
+    runLayout("fcose");
   }
 
   // --- Focus mode (double-click a node to drill into its neighborhood) --------
@@ -376,7 +376,7 @@
     showNodes(ids);
     // Use the layout currently selected in the toolbar (default: fcose) for the
     // focused subgraph, instead of the fixed radial layout (previously focusLayout).
-    runLayout($("layout").value);
+    runLayout("fcose");
   }
   function focusBack() {
     if (!focusStack.length) return;
@@ -517,10 +517,10 @@
     el("li", null, el("span", { className: "sw round", style: "background:" + COL.taxon }), T("taxa")),
     el("li", null, el("span", { className: "sw sq", style: "background:" + COL.molecule }), T("molecules"))
   );
-  var relSel = $("f-rel");
+
   relations.forEach(function (r) {
     var o = el("option", { value: r, textContent: r });
-    relSel.append(o);
+
     var sw = el("span", { className: "sw line", style: "background:" + relColor[r] });
     legend.append(el("li", null, sw, r));
   });
@@ -574,7 +574,7 @@
     var mb = $("modal-body");
     mb.replaceChildren();
     modalTitle.textContent = T(titleKey);
-    modalSpecNote.hidden = !(titleKey === "dependenciesTitle");
+    if (modalSpecNote) modalSpecNote.hidden = !(titleKey === "dependenciesTitle");
     bodyBuilder(mb);
     modal.hidden = false;
     $("modal-close").focus();
@@ -624,7 +624,7 @@
         var li = el("li", null,
           el("strong", { textContent: d.name + " " + d.version }),
           document.createTextNode(" — " + (d.license || "n/a")));
-        if (d.homepage) li.append(" ", link(d.homepage, "repo"));
+        // Removed links to SPECIFICATIONS.md and README.md as requested
         ul.append(li);
       });
       mb.append(ul);
@@ -651,8 +651,7 @@
   modal.addEventListener("click", function (e) { if (e.target === modal) closeModal(); });
   modal.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 
-  // --- Theme toggle --------------------------------------------------------------
-  $("b-theme").onclick = function () { document.body.classList.toggle("dark"); };
+
 
   // --- Footer AI traceability ----------------------------------------------------
   var g = CFG.generation || {};
@@ -689,9 +688,9 @@
   }
 
   // --- Wire controls -------------------------------------------------------------------
-  $("layout").value = CFG.defaultLayout || "fcose";
-  $("layout").onchange = function () { runLayout($("layout").value); };
-  $("b-relayout").onclick = function () { runLayout($("layout").value); };
+
+
+  $("b-relayout").onclick = function () { runLayout("fcose"); };
   $("b-fit").onclick = function () { cy.fit(visibleEles(), 35); };
   $("b-all").onclick = showAllNodes;
   $("b-focus").onclick = focusBack;
@@ -700,7 +699,7 @@
     if (s.nonempty()) { expand(s[0].id()); }
   };
   ["f-taxon", "f-mol", "f-deg"].forEach(function (id) { $(id).addEventListener("input", updateDisplay); });
-  $("f-rel").onchange = updateDisplay;
+
   var degIn = $("f-deg");
   degIn.addEventListener("input", function () { $("deg-out").textContent = degIn.value; updateDisplay(); });
   $("f-hide").onchange = applySelectionMode;
