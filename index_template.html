@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__SITE_TITLE__</title>
+<meta http-equiv="Content-Security-Policy" content="__SITE_CSP__">
+__SITE_HEAD_CSS__
+</head>
+<body>
+<div id="spinner" role="status" hidden><span class="spin"></span><span data-i18n="spinner"></span></div>
+
+<header id="toolbar">
+  <h1>__SITE_TITLE__</h1>
+  <span id="summary" class="summary" data-i18n="summary" data-i18n-args="taxa mols edges"></span>
+  <label for="search" class="sr" data-i18n="search"></label>
+  <input id="search" type="search" list="search-list" autocomplete="off" data-i18n-ph="searchPh" aria-describedby="search-hint">
+  <datalist id="search-list"></datalist>
+  <label for="layout" data-i18n="layout"></label>
+  <select id="layout" aria-label="Layout">
+    <option value="fcose">fcose</option>
+    <option value="cose">cose</option>
+    <option value="concentric">concentric</option>
+    <option value="circle">circle</option>
+    <option value="grid">grid</option>
+    <option value="bipartite" data-i18n="bipartite"></option>
+  </select>
+  <button id="b-relayout" data-i18n="relayout" type="button"></button>
+  <button id="b-fit" data-i18n="fit" type="button"></button>
+  <button id="b-all" data-i18n="showAll" type="button"></button>
+  <button id="x-export" data-i18n="export" type="button"></button>
+  <button id="b-theme" title="Toggle dark/light theme" aria-label="Toggle theme" type="button">◐</button>
+</header>
+
+<div id="banner" role="status" hidden></div>
+
+<main>
+  <div id="cy" role="application" aria-label="Interactive graph of taxa and chemical molecules">
+    <button id="b-focus" type="button" hidden title="Back to previous graph" aria-label="Back to previous graph">✕</button>
+  </div>
+  <aside id="panel">
+    <section>
+      <h2 data-i18n="details"></h2>
+      <div id="detail-body" tabindex="0"><p class="muted" data-i18n="noSelection"></p></div>
+    </section>
+    <section>
+      <h2 data-i18n="filters"></h2>
+      <label><input type="checkbox" id="f-taxon" checked> <span data-i18n="taxa"></span></label>
+      <label><input type="checkbox" id="f-mol" checked> <span data-i18n="molecules"></span></label>
+      <label for="f-deg" data-i18n="minDegree"></label>
+      <input type="range" id="f-deg" min="0" value="0" aria-describedby="deg-note">
+      <output id="deg-out" for="f-deg">0</output>
+      <p class="note" id="deg-note" data-i18n="degNote"></p>
+      <label for="f-rel" data-i18n="relation"></label>
+      <select id="f-rel"><option value="" data-i18n="allRel"></option></select>
+      <label for="depth" data-i18n="depth"></label>
+      <select id="depth"><option value="1">1</option><option value="2">2</option></select>
+      <button id="b-expand" data-i18n="expand" type="button" disabled></button>
+      <h3 data-i18n="selection"></h3>
+      <label><input type="checkbox" id="f-hide"> <span data-i18n="hideNonSelected"></span></label>
+      <label data-i18n="hideMode"></label>
+      <select id="hide-mode">
+        <option value="invisible" data-i18n="modeInvisible"></option>
+        <option value="greyed" data-i18n="modeGreyed"></option>
+      </select>
+      <button id="b-remove" data-i18n="removeFromGraph" type="button" disabled></button>
+    </section>
+    <section>
+      <h2 data-i18n="legend"></h2>
+      <ul id="legend"></ul>
+    </section>
+  </aside>
+</main>
+
+<footer id="foot">
+  <span id="ai-trace"></span>
+  <button id="b-about" data-i18n="about" type="button"></button>
+</footer>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 id="modal-title" data-i18n="dependenciesTitle"></h2>
+    <button id="modal-close" data-i18n="close" type="button" aria-label="Close"></button>
+    <div id="modal-body"></div>
+    <p class="note" id="modal-spec-note">
+      <a href="SPECIFICATIONS.md" target="_blank" rel="noopener noreferrer">SPECIFICATIONS.md</a>
+      &middot; <a href="README.md" target="_blank" rel="noopener noreferrer">README.md</a>
+    </p>
+  </div>
+</div>
+
+__SITE_SCRIPTS__
+</body>
+</html>

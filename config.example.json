@@ -1,0 +1,29 @@
+{
+  "urlTemplates": {
+    "ncbi": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id={id}",
+    "chebi": "https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:{id}"
+  },
+  "nodeSize": { "min": 10, "max": 26 },
+  "directedRelations": [],
+  "layout": { "nodeRepulsion": 4500, "idealEdgeLength": 120 },
+  "thresholds": {
+    "perf": 5000,
+    "hideLabelsZoom": 0.65,
+    "neighborLimit": 100,
+    "expansionCap": 500,
+    "suggestions": 20,
+    "debounceMs": 200
+  },
+  "dependencies": [
+    { "name": "Cytoscape.js", "version": "3.32.1", "license": "MIT", "file": "cytoscape.min.js", "homepage": "https://js.cytoscape.org" },
+    { "name": "cytoscape-fcose", "version": "2.2.0", "license": "MIT", "file": "cytoscape-fcose.min.js", "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-fcose" },
+    { "name": "layout-base", "version": "2.0.1", "license": "MIT", "file": "layout-base.js", "homepage": "https://github.com/iVis-at-Bilkent/layout-base" },
+    { "name": "cose-base", "version": "2.2.0", "license": "MIT", "file": "cose-base.js", "homepage": "https://github.com/iVis-at-Bilkent/cose-base" }
+  ],
+  "generation": {
+    "assistant": "OpenCode (Albert API)",
+    "model": "deepseek-v4-flash",
+    "date": "2026-11-15",
+    "projectVersion": "2.0.0"
+  }
+}
