@@ -1,95 +1,95 @@
-# Spécifications : générateur de site statique Cytoscape.js (taxons ↔ molécules ChEBI)
+# Specifications: Cytoscape.js static site generator (taxa ↔ ChEBI molecules)
 
-> Versions : v2 corrigée et complétée ; les ajouts/modifications majeurs depuis la v1 sont marqués **[V2]**, puis **[V3]**, **[V4]** et **[V5]** (dernière modification).
+> Versions: v2 corrected and completed; major additions/modifications since v1 are marked **[V2]**, then **[V3]**, **[V4]** and **[V5]** (latest modification).
 
-## 1. Objectif
+## 1. Objective
 
-Produire un **générateur** (script en ligne de commande) qui lit un fichier TSV de relations taxon ↔ molécule chimique et génère un **site web statique** autonome, sans backend, qui affiche ces relations sous forme de graphe interactif avec Cytoscape.js. Le site doit pouvoir être déployé tel quel sur GitHub Pages, GitLab Pages ou n'importe quel serveur de fichiers statiques, **et s'ouvrir par double-clic sur `index.html` (protocole `file://`)**.
+Produce a **generator** (command‑line script) that reads a TSV file of taxon ↔ chemical‑molecule relations and generates a **stand‑alone static website** that displays these relations as an interactive graph using Cytoscape.js. The site must be deployable as‑is on GitHub Pages, GitLab Pages or any static file server, and it should be openable by double‑clicking `index.html` (protocol `file://`).
 
-### 1.1 Identité de l'application
+### 1.1 Application identity
 
-**[V5]** L'application porte le nom **TaxoMetaGraph** (baseline : *Taxa–metabolite knowledge graph explorer*). Titre complet : *Public knowledge graph, associating taxa listed in the PubChem and LOTUS databases with metabolites linked to samples analysed within research projects*. Projet GitHub : `Taxa-metabolite-knowledge-graph-explorer`.
+**[V5]** The application is named **TaxoMetaGraph** (baseline: *Taxa–metabolite knowledge graph explorer*). Full title: *Public knowledge graph, associating taxa listed in the PubChem and LOTUS databases with metabolites linked to samples analysed within research projects*. GitHub project: `Taxa-metabolite-knowledge-graph-explorer`.
 
-Contexte du projet :
-- Projet : *Next level of reproducible, comparable and integrable Metabolomics*.
-- Work package : **WP 3, Species-specific resources**.
-- Objectif du WP : poser les bases de ressources spécifiques aux espèces, pour aider à l'interprétation des résultats de métabolomique.
+Project context:
+- Project: *Next level of reproducible, comparable and integrable Metabolomics*.
+- Work package: **WP 3, Species‑specific resources**.
+- WP objective: lay the foundations of species‑specific resources to help interpret metabolomics results.
 
-L'identité (nom, baseline, titre complet, dépôt GitHub, contexte) est **centralisée** dans le bloc `app` du fichier de configuration (`config.example.json`), reflété automatiquement dans `window.APP_CONFIG` (modal « À propos » du site) et documenté dans le `README.md`. Le titre de page (`<title>` et `<h1>`) porte le nom de l'application suivi de sa baseline.
+The identity (name, baseline, full title, GitHub repository, context) is **centralised** in the `app` block of the configuration file (`config.example.json`), automatically reflected in `window.APP_CONFIG` (the “About” modal) and documented in the `README.md`. The page title (`<title>` and `<h1>`) displays the application name followed by its baseline.
 
-## 2. Entrée : fichier TSV
+## 2. Input: TSV file
 
 ### 2.1 Format
 
-Séparateur tabulation, encodage UTF-8 (BOM toléré), fins de ligne LF ou CRLF, première ligne = en-tête.
+Tab‑separated, UTF‑8 encoding (BOM tolerated), line endings LF or CRLF, first line = header.
 
-| Colonne | Type | Obligatoire | Description |
+| Column | Type | Required | Description |
 |---|---|---|---|
-| `taxon_id` | entier > 0 | oui | Identifiant NCBI Taxonomy |
-| `taxon_name` | texte | oui | Nom du taxon |
-| `taxon_description` | texte | non | Description du taxon |
-| `relation` | texte | oui | Type de relation (ex. `skos:related`) |
-| `chebi_id` | entier > 0 | oui | Identifiant ChEBI (sans préfixe) |
-| `chebi_name` | texte | oui | Nom de la molécule |
-| `chebi_description` | texte | non | Description de la molécule |
-| `taxon_uri` | URI http(s) | non | URI du taxon (NCBITaxon OBO) ; si absent, calculée : `http://purl.obolibrary.org/obo/NCBITaxon_<id>` |
-| `chebi_uri` | URI http(s) | non | URI de la molécule (CHEBI OBO) ; si absente, calculée : `http://purl.obolibrary.org/obo/CHEBI_<id>` |
-| `taxon_description_source` | texte | non | Provenance de la description du taxon |
-| `chebi_description_source` | texte | non | Provenance de la description de la molécule |
+| `taxon_id` | integer > 0 | yes | NCBI Taxonomy identifier |
+| `taxon_name` | text | yes | Taxon name |
+| `taxon_description` | text | no | Taxon description |
+| `relation` | text | yes | Relation type (e.g. `skos:related`) |
+| `chebi_id` | integer > 0 | yes | ChEBI identifier (without prefix) |
+| `chebi_name` | text | yes | Molecule name |
+| `chebi_description` | text | no | Molecule description |
+| `taxon_uri` | http(s) URI | no | Taxon URI (NCBITaxon OBO); if missing, computed as `http://purl.obolibrary.org/obo/NCBITaxon_<id>` |
+| `chebi_uri` | http(s) URI | no | Molecule URI (CHEBI OBO); if missing, computed as `http://purl.obolibrary.org/obo/CHEBI_<id>` |
+| `taxon_description_source` | text | no | Source of the taxon description |
+| `chebi_description_source` | text | no | Source of the molecule description |
 
-Exemple (deux lignes de données, en-tête inclus) :
+Example (two data lines, header included):
 
 ```tsv
-taxon_id	taxon_name	taxon_description	relation	chebi_id	chebi_name	chebi_description	taxon_uri	chebi_uri	taxon_description_source	chebi_description_source
+ taxon_id	taxon_name	taxon_description	relation	chebi_id	chebi_name	chebi_description	taxon_uri	chebi_uri	taxon_description_source	chebi_description_source
 2	Bacteria	Bacteria is a domain taxon.	skos:related	15841	polypeptide	A peptide containing ten or more amino acid residues.	http://purl.obolibrary.org/obo/NCBITaxon_2	http://purl.obolibrary.org/obo/CHEBI_15841	generated_from_NCBI_lineage	ChEBI_OBO_file
 2	Bacteria	Bacteria is a domain taxon.	skos:related	18085	glycosaminoglycan	Any polysaccharide containing a substantial proportion of aminomonosaccharide residues.	http://purl.obolibrary.org/obo/NCBITaxon_2	http://purl.obolibrary.org/obo/CHEBI_18085	generated_from_NCBI_lineage	ChEBI_OBO_file
 ```
 
-### 2.2 Règles de lecture
+### 2.2 Reading rules
 
-- Une ligne = une arête (taxon, relation, molécule).
-- Les informations d'un même taxon ou d'une même molécule sont **répétées** sur plusieurs lignes : le générateur **doit dédupliquer** les nœuds (clé : `taxon_id` pour les taxons, `chebi_id` pour les molécules).
-- Si un même nœud a des valeurs incohérentes entre lignes (nom, description, URI), garder la première occurrence et émettre un avertissement (une seule fois par nœud et par champ).
-- Les lignes invalides sont ignorées avec un avertissement (numéro de ligne), sans arrêter la génération. Est invalide une ligne : dont un champ obligatoire est vide, dont un identifiant n'est pas un entier strictement positif, ou dont le nombre de colonnes ne correspond pas à l'en-tête. Un rapport récapitulatif est affiché en fin de génération.
-- **[V2]** Option `--strict` : toute ligne invalide provoque l'arrêt avec un code de sortie non nul. Sans cette option, code de sortie 0 si au moins une arête valide a été produite.
-- **[V2]** Une URI qui n'utilise pas le schéma `http` ou `https` est rejetée (champ vidé, avertissement) : elle ne sera jamais rendue sous forme de lien.
-- **[V2]** Lecture avec le module `csv` en mode **`quoting=csv.QUOTE_NONE`** : les guillemets présents dans les descriptions ne doivent pas être interprétés comme des délimiteurs. Espaces de début et de fin supprimés ; valeurs vides et `NA` / `null` traitées comme absentes.
-- Les doublons exacts d'arêtes (même taxon, même relation, même molécule) sont fusionnés. **[V2]** Deux relations différentes entre les mêmes nœuds restent deux arêtes distinctes (affichées en courbes parallèles).
-- Le fichier peut être volumineux (jusqu'à plusieurs centaines de milliers de lignes) : lecture en streaming.
+- One line = one edge (taxon, relation, molecule).
+- Information for the same taxon or same molecule may be **repeated** across multiple lines: the generator **must deduplicate** the nodes (key: `taxon_id` for taxa, `chebi_id` for molecules).
+- If a node has inconsistent values across lines (name, description, URI), keep the first occurrence and emit a warning (once per node and per field).
+- Invalid lines are ignored with a warning (line number), without stopping generation. A line is invalid if a required field is empty, an identifier is not a strictly positive integer, or the number of columns does not match the header. A summary report is displayed at the end.
+- **[V2]** `--strict` option: any invalid line causes the process to exit with a non‑zero status code. Without this option, the exit code is 0 if at least one valid edge was produced.
+- **[V2]** A URI that does not use the `http` or `https` scheme is rejected (field emptied, warning): it will never be rendered as a link.
+- **[V2]** Reading with the `csv` module in **`quoting=csv.QUOTE_NONE`** mode: quotes present in descriptions must not be interpreted as delimiters. Leading/trailing spaces are stripped; empty values and `NA`/`null` are treated as absent.
+- Exact duplicate edges (same taxon, same relation, same molecule) are merged. **[V2]** Different relations between the same nodes remain as separate edges (displayed as parallel curves).
+- The file can be large (up to several hundred thousand lines): streaming reading.
 
-## 3. Sortie : site statique
+## 3. Output: static site
 
-### 3.1 Arborescence
+### 3.1 Directory layout
 
 ```
-dist/
-├── index.html
-├── assets/
-│   ├── css/style.css
-│   ├── js/app.js
-│   ├── js/config.js            (paramètres : configuration injectée par le générateur)
-│   ├── js/i18n.js              (chaînes de l'interface)
-│   ├── js/graph-data.js        (données : window.GRAPH_DATA = {...})
-│   └── vendor/                 (Cytoscape.js et extensions, copiés localement)
-└── data/
-    └── graph.json              (mêmes données, pour réutilisation hors site)
+ dist/
+ ├── index.html
+ ├── assets/
+ │   ├── css/style.css
+ │   ├── js/app.js
+ │   ├── js/config.js            (parameters: configuration injected by the generator)
+ │   ├── js/i18n.js              (UI strings)
+ │   ├── js/graph-data.js        (data: window.GRAPH_DATA = {...})
+ │   └── vendor/                 (Cytoscape.js and extensions, copied locally)
+ └── data/
+     └── graph.json              (same data, for external reuse)
 ```
 
-Contraintes :
+Constraints:
 
-- **Aucune dépendance CDN à l'exécution** : toutes les bibliothèques JS sont embarquées dans `assets/vendor/` (site utilisable hors ligne). Les polices sont celles du système.
-- Aucun framework de build côté site (JavaScript vanilla ES6+), pour garder le site lisible et pérenne.
-- telecharge les dependances necessaires (cytoscape, etc...)
-- Les chemins sont **relatifs** pour permettre un déploiement dans un sous-répertoire.
-- **[V2]** Les données sont chargées via `<script src="assets/js/graph-data.js">` et non via `fetch()` : `fetch` sur `file://` est bloqué par les navigateurs, ce qui rendrait impossible le double-clic sur `index.html`. `data/graph.json` est fourni en complément pour les usages externes.
-- **[V2]** Pas de modules ES (`type="module"`) : également bloqués sur `file://` dans certains navigateurs ; utiliser des scripts classiques.
-- Option de génération d'un **fichier HTML unique** autonome (données et scripts inlinés) pour les petits jeux de données. **[V2]** Lors de l'inlining, échapper `</script>` et `<!--` dans le JSON.
-- **[V2]** Politique de sécurité de contenu (`<meta http-equiv="Content-Security-Policy">`) restrictive : `default-src 'self'`, aucune connexion sortante (`connect-src 'none'`).
-  - **[V3 — note d'implémentation]** Cytoscape.js positionne et stylise les éléments du graphe par **styles inline** (attributs `style` et éléments `<style>` injectés) : en mode multi-fichiers, la directive `style-src` doit donc inclure `'unsafe-inline'` pour que le graphe s'affiche. La directive critique `script-src` reste stricte (`'self'`) en mode multi-fichiers — c'est la frontière réelle contre l'injection XSS. En mode fichier unique, `'unsafe-inline'` s'applique au script comme au style (tout étant inliné dans la page).
+- **No CDN dependencies at runtime**: all JS libraries are bundled in `assets/vendor/` (site works offline). System fonts are used.
+- No build framework on the site (plain ES6+ JavaScript) to keep the site readable and maintainable.
+- Download the necessary dependencies (cytoscape, etc.).
+- Paths are **relative** to allow deployment in a sub‑directory.
+- **[V2]** Data is loaded via `<script src="assets/js/graph-data.js">` and not via `fetch()`: `fetch` on `file://` is blocked by browsers, which would make double‑click opening of `index.html` impossible. `data/graph.json` is provided as an auxiliary file for external use.
+- **[V2]** No ES modules (`type="module"`): also blocked on `file://` in some browsers; use classic scripts.
+- Option to generate a **single‑file self‑contained HTML** (data and scripts inlined) for small datasets. **[V2]** When inlining, escape `</script>` and `<!--` in the JSON.
+- **[V2]** Strict Content‑Security‑Policy (`<meta http-equiv="Content-Security-Policy">`): `default-src 'self'`, no outgoing connections (`connect-src 'none'`).
+  - **[V3 – implementation note]** Cytoscape.js positions and styles graph elements via **inline styles** (style attributes and `<style>` elements). In multi‑file mode, the `style-src` directive must therefore include `'unsafe-inline'` for the graph to display. The critical `script-src` directive remains strict (`'self'`) in multi‑file mode – this is the main defence against XSS. In single‑file mode, `'unsafe-inline'` applies to both script and style (everything being inlined in the page).
 
-### 3.2 Modèle de données Cytoscape
+### 3.2 Cytoscape data model
 
-**Nœud taxon** :
+**Taxon node**:
 
 ```json
 { "data": {
@@ -98,7 +98,7 @@ Contraintes :
     "description_source": "generated_from_NCBI_lineage", "degree": 2 } }
 ```
 
-**Nœud molécule** :
+**Molecule node**:
 
 ```json
 { "data": {
@@ -107,7 +107,7 @@ Contraintes :
     "description_source": "ChEBI_OBO_file", "degree": 1 } }
 ```
 
-**Arête** :
+**Edge**:
 
 ```json
 { "data": {
@@ -115,103 +115,96 @@ Contraintes :
     "relation": "skos:related" } }
 ```
 
-- Le générateur calcule pour chaque nœud un attribut `degree` (nombre d'arêtes distinctes). **[V2]** Le site recalcule un `visibleDegree` dynamique quand des filtres sont actifs ; le filtre « degré minimum » porte sur le degré **global** (précisé dans l'interface).
-- **[V2]** Les relations de type `skos:related` sont symétriques : les arêtes sont affichées **sans flèche** par défaut. Un champ `directed` par relation (configurable) permet d'afficher des flèches pour d'autres relations.
-- **[V2]** Format compact possible pour les gros jeux : tableaux de nœuds et d'arêtes séparés, convertis en éléments Cytoscape au chargement (réduit la taille du fichier et le temps de parsing).
+- The generator computes a `degree` attribute for each node (number of distinct edges). **[V2]** The site recomputes a dynamic `visibleDegree` when filters are active; the “minimum degree” filter applies to the **global** degree (shown in the UI).
+- **[V2]** Relations of type `skos:related` are symmetric: edges are displayed **without arrowheads** by default. A `directed` flag per relation (configurable) allows arrows for other relations.
+- **[V2]** Compact format possible for large datasets: separate node and edge arrays, converted to Cytoscape elements on load (reduces file size and parsing time).
 
-## 4. Fonctionnalités du site
+## 4. Site features
 
-### 4.1 Graphe (Cytoscape.js)
+### 4.1 Graph (Cytoscape.js)
 
-- **Graphe biparti** : deux types de nœuds visuellement distincts, **par la forme et la couleur** (pas uniquement la couleur, pour le daltonisme).
-  - Taxons : forme ronde, couleur A (ex. vert).
-  - Molécules : carré arrondi, couleur B (ex. orange).
-- **[V2]** Taille des nœuds proportionnelle à `sqrt(degré)` entre un minimum et un maximum configurables (par défaut 10 px – 26 px ; **[V3]** bornes réduites pour rester proportionnées sur les graphes réels à forte hétérogénéité de degré)). Voir aussi le critère d'acceptation sur le chevauchement.
-- Étiquettes affichées sous les nœuds ; masquage automatique des étiquettes en dessous d'un certain niveau de zoom, pour la lisibilité. **[V2]** Les étiquettes du nœud survolé ou sélectionné sont toujours affichées.
-- Couleur ou style d'arête par type de `relation` (légende générée dynamiquement à partir des relations présentes dans le TSV).
-- Zoom, déplacement (pan), glisser-déposer des nœuds, sélection multiple.
-  - **[V5 — nouvelle fonctionnalité]** **Zoom accéléré sous Ctrl/Cmd** : tenir la touche **Ctrl** (ou **Cmd ⌘** sur macOS) pendant un défilement de molette multiplie la sensibilité du zoom (~2× par défaut, configurable) pour parcourir rapidement les niveaux de zoom. Implémentation : mise à jour de `wheelSensitivity` en **phase de capture sur `document`** (avant le gestionnaire natif de Cytoscape, qui relit la sensibilité à chaque événement) ; la sensibilité revenant à sa valeur normale dès que Ctrl/Cmd est relâché.
-  - **[V3 — nouvelle fonctionnalité]** **Grab dynamique** : pendant qu'on saisit et déplace un nœud, son **voisinage direct** suit le mouvement à 80 % et les voisins à **2 sauts** à 40 % (effet ressort/atténué). Cela permet d'extraire visuellement un nœud et son contexte d'un paquet dense pour l'inspecter. **[V3 préc.]** Implémenté par une boucle `requestAnimationFrame` démarrée au `grab` et stoppée au `free`/`dragfree` (indépendante de l'événement `drag`). Seuls les voisins **déjà affichés** sont tirés ; **aucun nœud n'est créé** par cette interaction.
-- Survol d'un nœud : mise en évidence du nœud et de son voisinage immédiat, atténuation du reste. **[V3 — précision]** L'atténuation (opacité réduite) porte aussi sur les **arêtes** hors contexte, pas seulement sur les nœuds (les sélecteurs de classe `.faded`/`.greyout` sont appliqués après les styles d'arêtes pour primer sur leur opacité).
-- **[V2]** Sélection d'un nœud : option « Masquer les nœuds non sélectionnés » dans le panneau de contrôle, avec le choix de **deux modes** : *invisibles* (**par défaut**) ou *grisés*. Les nœuds conservés visibles sont le nœud sélectionné **et son voisinage direct** (et leurs arêtes) ; tout le reste est masqué ou grisé. Le comportement est annulé en cliquant sur le fond du graphe ou sur « Réinitialiser ».
+- **Bipartite graph**: two node types visually distinct, **by shape and colour** (not only colour, to aid colour‑blind users).
+  - Taxa: round shape, colour A (e.g. green).
+  - Molecules: rounded square, colour B (e.g. orange).
+- **[V2]** Node size proportional to `sqrt(degree)` between a configurable minimum and maximum (default 10 px – 26 px; **[V3]** reduced bounds for highly heterogeneous real‑world graphs). See also the acceptance criterion on overlapping.
+- Labels are displayed beneath nodes; automatic label hiding below a certain zoom level for readability. **[V2]** Labels of hovered or selected nodes are always shown.
+- Edge colour or style varies by `relation` type (legend generated dynamically from the relations present in the TSV).
+- Zoom, pan, node drag‑and‑drop, multiple selection.
+  - **[V5 – new feature]** **Accelerated zoom with Ctrl/Cmd**: holding **Ctrl** (or **Cmd ⌘** on macOS) while scrolling the mouse wheel multiplies zoom sensitivity (~2× by default, configurable) to quickly navigate zoom levels. Implemented by updating `wheelSensitivity` **in capture phase on `document`** (before Cytoscape’s native handler, which rereads sensitivity each event); sensitivity returns to normal when Ctrl/Cmd is released.
+  - **[V3 – new feature]** **Dynamic grab**: while dragging a node, its **direct neighbours** follow the movement at 80 % and 2‑hop neighbours at 40 % (spring‑like effect). This allows extracting a node and its context from a dense cluster for inspection. **[V3 note]** Implemented via a `requestAnimationFrame` loop started on `grab` and stopped on `free`/`dragfree` (independent of the `drag` event). Only already‑displayed neighbours are pulled; **no new nodes are created** by this interaction.
+- Hover on a node highlights the node and its immediate neighbourhood, dimming the rest. **[V3 – precision]** The dimming (reduced opacity) also applies to **edges** outside the neighbourhood, not just nodes (the `.faded`/`.greyout` class selectors are applied after edge styles to take precedence).
+- **[V2]** Node selection: “Hide non‑selected nodes” option in the control panel, with two modes: *invisible* (**default**) or *grayed*. Nodes kept visible are the selected node **and its direct neighbours** (and their edges); everything else is hidden or dimmed. The behaviour is cancelled by clicking the background or “Reset”.
 
-### 4.2 Mises en page (layouts)
+### 4.2 Layouts
 
-Sélecteur de layout, avec au minimum :
+The site uses only the **fcose** layout, applied automatically on load, on focus actions and on expansion. The `fcose` parameters (`nodeDimensionsIncludeLabels`, `packComponents`, `nodeRepulsion`, `idealEdgeLength`, `quality`) are set to avoid node overlap.
 
-- `fcose` (par défaut, force-directed performant) ;
-- `cose`, `concentric`, `circle`, `grid` ;
-- **[V2]** un layout **biparti** (obligatoire) : taxons sur une colonne, molécules sur une autre, positions calculées par le script (`preset`), tri par degré décroissant ou par nom.
+The “Relayout” button (fcose) and the “Fit to view” button remain available.
 
-**[V2]** Paramètres de `fcose` à définir pour éviter le chevauchement : `nodeDimensionsIncludeLabels: true`, `packComponents: true`, `nodeRepulsion` et `idealEdgeLength` adaptés à la taille des nœuds, `quality: "default"` (ou `"draft"` au-delà du seuil de performance).
+### 4.3 Details panel
 
-Bouton « Relancer le layout » et bouton « Ajuster à la vue » (fit).
+On node click, a side panel shows:
 
-### 4.3 Panneau de détails
+- name, type, identifier;
+- description and its **source**;
+- clickable URI (opens in a new tab, `rel="noopener noreferrer"`);
+- list of neighbour nodes (clickable to recenter and select; **[V2]** paginated or limited to 100 with “Show more” for high‑degree nodes);
+- external links calculated (**[V2]** configurable URL templates in the configuration file, as external URLs evolve):
+  - NCBI Taxonomy: `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=<id>`;
+  - ChEBI: `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:<id>` (**to verify** before release: ChEBI has revamped its site; the current address may be `https://www.ebi.ac.uk/chebi/CHEBI:<id>`).
 
-Au clic sur un nœud, panneau latéral affichant :
+On edge click, source, target and relation are displayed.
 
-- le nom, le type, l'identifiant ;
-- la description et sa **source** ;
-- l'URI cliquable (ouverture dans un nouvel onglet, `rel="noopener noreferrer"`) ;
-- la liste des nœuds voisins (cliquables pour recentrer et sélectionner ; **[V2]** paginée ou limitée à 100 avec « Voir plus » pour les nœuds à fort degré) ;
-- liens externes calculés (**[V2]** gabarits d'URL configurables dans un fichier de configuration, car les URL des sites externes évoluent) :
-  - NCBI Taxonomy : `https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=<id>` ;
-  - ChEBI : `https://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:<id>` (**à vérifier** avant livraison : ChEBI a refondu son site, l'adresse actuelle de type `https://www.ebi.ac.uk/chebi/CHEBI:<id>` peut être préférable).
+### 4.4 Search and filters
 
-Au clic sur une arête : afficher source, cible et relation.
-
-### 4.4 Recherche et filtres
-
-- **Recherche textuelle** (autocomplétion) sur nom et identifiant, avec centrage et sélection du nœud trouvé. **[V2]** La recherche porte sur **l'ensemble des données** (index en mémoire), y compris les nœuds non affichés en mode exploration ; trouver un nœud non affiché l'ajoute au graphe. Recherche insensible à la casse et aux accents, avec un anti-rebond (≈ 200 ms) et un maximum de 20 suggestions.
-- **Filtres** :
-  - afficher/masquer les taxons, les molécules ;
-  - filtre par type de relation ;
-  - filtre par degré minimum.
-- Action « Étendre au voisinage » (bouton) : mode d'exploration progressive où l'on part d'un nœud choisi et affiche ses voisins à 1 ou 2 sauts. Mode utile pour les gros graphes. **[V2]** Si l'expansion dépasserait un plafond (ex. 500 nœuds ajoutés), demander confirmation ou ne garder que les voisins de plus haut degré.
-- **[V3 — nouvelle fonctionnalité]** **Double-clic sur un nœud = sous-graphe ciblé (mode focus)** : le double-clic remplace la vue par un **nouveau graphe** composé du nœud et de son voisinage (profondeur 1 ou 2 selon le sélecteur « Neighborhood »). Un bouton « ✕ » en barre d'outils permet de **revenir au graphe précédent** (une pile gère les niveaux imbriqués ; les positions du graphe de départ sont restaurées). **[V4]** Le sous-graphe est disposé avec le **layout sélectionné dans la barre d'outils** (fcose par défaut), comme n'importe quel graphe : le sélecteur de layout s'applique donc aussi en mode focus. *(Version antérieure : layout radial déterministe `focusLayout` basé sur `focusGap`, désormais retiré.)*
-- Bouton « Tout afficher » / « Réinitialiser ».
-- **[V2]** Bouton « Retirer du graphe » pour masquer un nœud ou une sélection. **[V4]** Les boutons undo/redo ont été retirés (la fonctionnalité d'annulation a été supprimée).
+- **Text search** (autocomplete) on name and identifier, centering and selecting the found node. **[V2]** The search covers **the whole dataset** (in‑memory index), including nodes not currently displayed in exploration mode; finding a hidden node adds it to the graph. Case‑insensitive and accent‑insensitive search, with debounce (~200 ms) and a maximum of 20 suggestions.
+- **Filters**:
+  - show/hide taxa, molecules;
+  - filter by minimum degree.
+- “Expand neighbourhood” action (button): progressive exploration mode starting from a chosen node and displaying its neighbours one or two hops away. Useful for large graphs. **[V2]** If the expansion would exceed a ceiling (e.g. 500 added nodes), ask for confirmation or keep only the highest‑degree neighbours.
+- **[V3 – new feature]** **Double‑click on a node = focused sub‑graph (focus mode)**: double‑click replaces the view with a **new graph** consisting of the node and its neighbourhood (depth 1 or 2 according to the “Neighborhood” selector). A “✕” button in the toolbar allows **returning to the previous graph** (a stack manages nested levels; the original graph positions are restored). **[V4]** The sub‑graph is laid out with the **layout selected in the toolbar** (fcose by default), just like any other graph: the layout selector therefore also applies in focus mode. *(Earlier version used a deterministic radial layout `focusLayout` based on `focusGap`, now removed.)*
+- “Show all” / “Reset” buttons.
+- **[V2]** “Remove from graph” button to hide a node or selection. **[V4]** Undo/redo buttons have been removed (the undo functionality is gone).
 
 ### 4.5 Exports
 
-- **[V5]** Un **bouton unique « Export »** dans la barre d'outils ouvre une **modal de choix de format** ; l'utilisateur sélectionne le format désiré dans une liste de quatre options :
-  - **PNG** (via `cy.png()`, fond blanc, option d'échelle `scale` — ici ×2) ;
-  - **SVG** (extension `cytoscape-svg`, dégradation gracieuse si absente : message d'information) ;
-  - **JSON** du sous-graphe visible (nœuds et arêtes non masqués) ;
-  - **TSV** du sous-graphe visible (même format que l'entrée, réimportable).
-- La modal réutilise la boîte de dialogue commune du site (titre dynamique, fermeture par « ✕ », clic à l'extérieur ou `Esc`) ; les options sont des boutons navigables au clavier. Les exports **PNG** et **JSON** restent les deux formats garantis (critère d'acceptation n°8).
+- **[V5]** A single **Export** button in the toolbar opens a **format‑choice modal**; the user selects one of four options:
+  - **PNG** (via `cy.png()`, white background, scale option `scale` — here ×2);
+  - **SVG** (via `cytoscape-svg` extension; graceful degradation with an informational message if absent);
+  - **JSON** of the visible sub‑graph (nodes and edges not hidden);
+  - **TSV** of the visible sub‑graph (same format as input, re‑importable).
+- The modal reuses the common dialog box (dynamic title, close button “✕”, click outside or `Esc` to close). Options are keyboard‑navigable buttons. **PNG** and **JSON** remain the two guaranteed formats (acceptance criterion #8).
 
-### 4.6 Performance et retours visuels
+### 4.6 Performance and visual feedback
 
-- Graphe de petite taille (< 2 000 nœuds) : affichage complet au chargement.
-- Graphe plus grand : démarrage en **mode exploration** (par exemple, uniquement les nœuds de plus haut degré ou un nœud choisi), avec un message d'information et un seuil configurable (`--max-initial-nodes`).
-  - **[V3 — note d'implémentation]** Par défaut le seuil est de **150** nœuds (initialement 2000). **[V4]** Le seuil par défaut est désormais **500** nœuds et le plafond d'affichage en mode exploration lui est aligné (les 500 nœuds de plus haut degré) : au-delà, l'application démarre en mode exploration et n'affiche que les nœuds de plus haut degré (jusqu'au seuil), ce qui rend l'ouverture et le layout `fcose` réactifs sur de grands jeux de données. Le seuil reste ajustable ; le bouton « Show all » permet d'afficher tout le graphe (avec confirmation). **[V3]** Le message d'information est affiché dans une **bannière fermable** (bouton « × ») : informative à l'ouverture, elle peut être masquée par l'utilisateur.
-- Utilisation du rendu canvas de Cytoscape, avec options de performance (`textureOnViewport`, `hideEdgesOnViewport`, `hideLabelsOnViewport`) activées au-delà d'un seuil.
-- **[V2]** **Indicateur d'attente** (sablier / spinner) affiché pendant : le chargement initial, le calcul d'un layout, les recherches et les expansions longues. L'indicateur est affiché **avant** le calcul (laisser le navigateur peindre via `requestAnimationFrame` puis `setTimeout`), et masqué à la fin du layout (événement `layoutstop`). Le curseur passe en `wait` pendant l'opération.
-- **[V2]** Budget de performance : chargement initial < 5 s pour 100 000 arêtes (index et données), interaction fluide (> 30 images/s au pan/zoom) avec 5 000 éléments affichés.
+- Small graph (< 2 000 nodes): full display on load.
+- Larger graph: start in **exploration mode** (e.g. only highest‑degree nodes or a chosen node), with an informational message and a configurable threshold (`--max-initial-nodes`).
+  - **[V3 – implementation note]** Default threshold is **150** nodes (originally 2000). **[V4]** The default threshold is now **500** nodes and the exploration display ceiling is aligned (the top 500 nodes by degree). Beyond that, the app starts in exploration mode and shows only the highest‑degree nodes (up to the threshold), making opening and the `fcose` layout responsive for large datasets. The threshold remains adjustable; the “Show all” button can display the whole graph (with confirmation). **[V3]** The informational message is shown in a **dismissible banner** (× button); it can be hidden by the user.
+- Canvas rendering with Cytoscape, performance options (`textureOnViewport`, `hideEdgesOnViewport`, `hideLabelsOnViewport`) enabled beyond a threshold.
+- **[V2]** **Waiting indicator** (spinner) displayed during long operations (layout, search, expansion). The indicator appears **before** the operation (allowing the browser to paint via `requestAnimationFrame` then `setTimeout`) and hides after the layout (`layoutstop`). Cursor changes to `wait` during the operation.
+- **[V2]** Performance budget: initial load < 5 s for 100 000 edges (index and data), fluid interaction (> 30 fps pan/zoom) with 5 000 elements displayed.
 
 ### 4.7 Interface
 
-- Mise en page : barre d'outils en haut, graphe plein écran, panneau latéral rétractable, légende.
-- Responsive (utilisable sur tablette, **[V2]** gestes tactiles : pincer pour zoomer, appui long pour étendre).
-- Accessibilité de base : contrastes suffisants (WCAG AA), éléments de formulaire étiquetés, navigation clavier pour la recherche et les boutons, focus visible. **[V2]** Alternative textuelle au graphe : liste des résultats de recherche et du voisinage consultable au clavier et par lecteur d'écran.
-- Langue de l'interface : anglais.
-- Thème clair ; thème sombre optionnel.
-- **[V2]** Gestion des erreurs visibles : échec de chargement des données, graphe vide, aucun résultat de recherche.
-- **[V2]** Navigateurs supportés : dernières versions de Firefox, Chrome, Edge, Safari.
+- Layout: toolbar at top, full‑screen graph, retractable side panel, legend.
+- Responsive (usable on tablets, **[V2]** touch gestures: pinch to zoom, long‑press to expand).
+- Basic accessibility: sufficient contrast (WCAG AA), labeled form elements, keyboard navigation for search and buttons, visible focus outline. **[V2]** Textual alternative to the graph: list of search results and neighbourhood accessible via keyboard and screen reader.
+- Interface language: English.
+- Light theme only.
+- **[V2]** Visible error handling: data load failure, empty graph, no search results.
+- **[V2]** Supported browsers: latest versions of Firefox, Chrome, Edge, Safari.
 
-## 5. Le générateur
+## 5. Generator
 
-### 5.1 Technologie
+### 5.1 Technology
 
-Au choix du générateur IA, mais à justifier. Recommandé : **Python 3.10+** avec **uniquement la bibliothèque standard** (`csv`, `json`, `argparse`, `pathlib`, `shutil`, `string.Template`) afin de n'avoir aucune dépendance à installer. **[V2]** (Jinja2 est écarté dans la version recommandée pour rester cohérent avec ce choix ; s'il est utilisé, il doit être listé dans `requirements.txt`.) Alternative acceptable : Node.js.
+Choice of AI generator is up to you, but must be justified. Recommended: **Python 3.10+** using **only the standard library** (`csv`, `json`, `argparse`, `pathlib`, `shutil`, `string.Template`) to avoid any external dependencies. **[V2]** (Jinja2 is excluded in the recommended version to stay consistent; if used, it must be listed in `requirements.txt`). Acceptable alternative: Node.js.
 
-### 5.2 Interface en ligne de commande
+### 5.2 Command‑line interface
 
 ```bash
 python build_site.py --input forumLotusWInferrence.enriched.tsv --output dist/ \
-    [--title "Taxons et molécules"] \
+    [--title "Taxons and molecules"] \
     [--single-file] \
     [--max-initial-nodes 500] \
     [--default-layout fcose] \
@@ -220,72 +213,70 @@ python build_site.py --input forumLotusWInferrence.enriched.tsv --output dist/ \
     [--quiet]
 ```
 
-### 5.3 Comportement
+### 5.3 Behaviour
 
-1. Valider l'en-tête du TSV (colonnes obligatoires présentes, ordre indifférent, colonnes inconnues ignorées avec avertissement).
-2. Construire les nœuds dédupliqués et les arêtes ; calculer les degrés.
-3. Produire `graph.json` et `graph-data.js`.
-4. Copier les ressources statiques et les bibliothèques vendorisées (hors ligne : **les bibliothèques sont fournies dans le dépôt du générateur**, le script ne télécharge rien).
-5. Générer `index.html` avec les paramètres (titre, layout par défaut, seuils).
-6. Afficher un résumé : nombre de taxons, de molécules, d'arêtes, de relations distinctes, de lignes ignorées, d'avertissements.
+1. Validate the TSV header (required columns present, order irrelevant, unknown columns ignored with a warning).
+2. Build deduplicated nodes and edges; compute degrees.
+3. Produce `graph.json` and `graph-data.js`.
+4. Copy static assets and vendored libraries (offline: **the libraries are provided in the generator repository**, the script does not download anything).
+5. Generate `index.html` with parameters (title, default layout, thresholds).
+6. Display a summary: number of taxa, molecules, edges, distinct relations, ignored lines, warnings.
 
-Le script doit être **idempotent** et **déterministe** (même entrée → même sortie octet pour octet : tri stable des éléments, aucun horodatage dans les fichiers générés, JSON sérialisé avec des clés triées). Le répertoire de sortie est vidé ou écrasé proprement sans toucher à d'autres fichiers hors de `dist/`.
+The script must be **idempotent** and **deterministic** (same input → identical byte‑for‑byte output: stable sorting, no timestamps in generated files, JSON serialized with sorted keys). The output directory is safely emptied or overwritten without touching files outside `dist/`.
 
-### 5.4 Bibliothèques JS à embarquer (versions fixées)
+### 5.4 Bundled JS libraries (fixed versions)
 
-- `cytoscape` (version stable récente)
-- `cytoscape-fcose` (et ses dépendances `layout-base`, `cose-base`)
-- **[V5]** Export **SVG** via `cytoscape-svg` : **optionnel et non embarqué par défaut** — l'application détecte son absence (`window.cytoscapeSvg`) et affiche un message d'information au lieu de l'export. S'il doit être fourni, l'ajouter dans `assets/vendor/` et le déclarer en dépendance. `cytoscape-popper` (infobulles) : optionnel, non embarqué.
+- `cytoscape` (recent stable version)
+- `cytoscape-fcose` (and its dependencies `layout-base`, `cose-base`)
+- **[V5]** **SVG export** via `cytoscape-svg`: **optional and not bundled by default** — the app detects its absence (`window.cytoscapeSvg`) and shows an informational message instead of exporting. If required, add it to `assets/vendor/` and list it as a dependency. `cytoscape-popper` (tooltips): optional, not bundled.
 
-Les versions exactes sont notées dans un fichier `VENDOR.md` avec leurs licences (**[V2]** et les sommes de contrôle SHA-256 des fichiers).
+Exact versions and licenses are listed in `VENDOR.md` with SHA‑256 checksums.
 
-## 6. Qualité et livrables
+## 6. Quality and deliverables
 
-- Code commenté et structuré (séparation données / logique / présentation).
-- `README.md` : installation, usage, format du TSV, déploiement (GitHub Pages), limites connues.
-- Jeu de données d'exemple (`example.tsv`, ~20 lignes dont les deux lignes fournies) pour démonstration. **[V2]** Il inclut volontairement des cas limites : doublon d'arête, description incohérente, ligne invalide, caractères accentués, guillemets et balises HTML dans une description.
-- Tests minimaux du générateur (`pytest` ou `unittest`) : lecture TSV, déduplication, gestion des lignes invalides, structure du JSON de sortie, déterminisme (deux exécutions identiques).
-- Aucune requête réseau à l'exécution du site ; aucune donnée envoyée à l'extérieur.
-- Sécurité : échapper tout contenu issu du TSV avant insertion dans le DOM (prévention des injections XSS dans les descriptions et noms) ; **[V2]** utiliser `textContent` plutôt que `innerHTML`, ne générer des liens que pour les URI `http(s)`.
-- **[V2]** Licence du projet et mention des licences des données (ChEBI : CC BY 4.0 ; NCBI Taxonomy : domaine public selon conditions NCBI) dans le README et dans le pied de page du site.
+- Well‑commented and structured code (separate data, logic, presentation).
+- `README.md`: installation, usage, TSV format, deployment (GitHub Pages), known limits.
+- Example dataset (`example.tsv`, ~20 lines including the two lines shown above) for demonstration. **[V2]** It deliberately includes edge cases: duplicate edge, inconsistent description, invalid line, accented characters, quotes and HTML tags in a description.
+- Minimal generator tests (`pytest` or `unittest`): TSV reading, deduplication, handling of invalid lines, output JSON structure, determinism (two identical runs produce identical output).
+- No network requests at site runtime; no data sent outside.
+- Security: escape all TSV‑derived content before inserting into the DOM (prevent XSS in descriptions and names); **[V2]** use `textContent` rather than `innerHTML`, generate links only for `http(s)` URIs.
+- **[V2]** Project license and data‑license notices (ChEBI: CC BY 4.0; NCBI Taxonomy: public domain under NCBI conditions) in the README and site footer.
 
-## 7. Informations sur les dépendances et la génération
+## 7. Dependency and generation information
 
-- **[V2]** Le site doit proposer une **fenêtre ouvrante** (modal, panneau dépliable ou boîte de dialogue accessible) permettant de consulter les **versions des dépendances** embarquées, notamment Cytoscape.js et ses extensions. Cette fenêtre doit être accessible depuis l’interface, par exemple via un lien « À propos » ou « Dépendances ».
-- **[V2]** La fenêtre doit indiquer, pour chaque dépendance : son nom, sa version exacte, sa licence et, si pertinent, un lien vers son dépôt ou sa documentation.
-- **[V2]** Les informations affichées doivent correspondre aux versions réellement embarquées dans `assets/vendor/` et être cohérentes avec `VENDOR.md`.
-- **[V2]** Le générateur du site web a été produit avec l’aide d’une IA à partir des présentes spécifications, qui sont téléchargeables et mises à disposition avec le projet.
-- **[V2]** Cette mention doit apparaître dans le `README.md`, dans la fenêtre « Dépendances / À propos » du site et, si approprié, dans le pied de page du site.
-- **[V3] Traçabilité de la génération par IA** : le site généré doit afficher explicitement une mention indiquant qu'il a été développé avec l'aide d'une intelligence artificielle. Cette mention doit préciser, dans la mesure où ces informations sont disponibles :
-  - le nom de l'IA ou de l'assistant utilisé (ex. : OpenAI ChatGPT) ;
-  - le nom et la version exacte du modèle utilisé (ex. : GPT-6) ;
-  - la date de génération ou de dernière mise à jour du code ;
-  - éventuellement, un numéro de version ou un identifiant de génération du projet.
+- **[V2]** The site must provide an **information modal** (dialog, expandable panel, or accessible box) showing the **versions of bundled dependencies**, notably Cytoscape.js and its extensions. This modal must be reachable from the UI, e.g. via an “About” or “Dependencies” link.
+- **[V2]** The modal must list, for each dependency: name, exact version, license and, if relevant, a link to its repository or documentation.
+- **[V2]** The displayed information must match the actual bundled versions in `assets/vendor/` and be consistent with `VENDOR.md`.
+- **[V2]** The site generator was produced with the help of an AI from these specifications, which are downloadable and provided with the project.
+- **[V2]** This notice must appear in the `README.md`, in the “Dependencies / About” modal and, if appropriate, in the site footer.
+- **[V3]** **AI generation traceability**: the generated site must explicitly mention that it was developed with the help of an AI. The notice should include, when available:
+  - the name of the AI or assistant used (e.g. OpenAI ChatGPT);
+  - the exact model name and version (e.g. GPT‑6);
+  - the generation or last‑update date;
+  - optionally, a version number or generation identifier for the project.
+- **[V3]** These details should be grouped under an “About / AI Generation” section accessible from the UI and also appear in the `README.md`. A short footer note, e.g. “Site developed with the help of [AI name], model [model], on [date]”, is required.
+- **[V3]** Generation metadata must be centralised in a configuration or metadata file to avoid inconsistencies. Information that is not available must not be invented.
 
-- **[V3]** Ces informations doivent être regroupées dans une rubrique « À propos / Génération par IA », accessible depuis l'interface du site, et figurer également dans le `README.md`. Une mention courte doit être présente dans le pied de page, par exemple : « Site développé avec l'aide de [nom de l'IA], modèle [modèle], le [date] ».
+## 8. Acceptance criteria
 
-- **[V3]** Les métadonnées de génération doivent être centralisées dans un fichier de configuration ou de métadonnées afin d'éviter toute incohérence entre les différentes mentions. Les informations non disponibles ne doivent pas être inventées.
+1. From a valid TSV, the command produces a `dist/` folder that can be opened directly (double‑click `index.html` or via a static server).
+2. The graph displays taxa and molecules with distinct styles and relations as edges.
+3. **[V2]** Node diameters are bounded (min/max) and the default layout does not cause nodes to overlap (labels included): no node masks another after the `fcose` layout on the example and on a sample of 2 000 nodes.
+4. Clicking a node shows correct description, source and links.
+5. The search and filters work.
+6. Nodes are not duplicated despite repeated information in the TSV.
+7. A TSV of 100 000 lines is generated without error and the site remains usable (exploration mode).
+8. PNG and JSON exports work.
+9. **[V2]** A waiting indicator is visible during long operations (layout, search, expansion).
+10. **[V2]** On node selection, non‑selected nodes are invisible by default; the checkbox can gray them or disable the behaviour.
+11. **[V2]** A description containing `<script>alert(1)</script>` is displayed as plain text, without execution.
 
-## 8. Critères d'acceptation
+## 9. Possible extensions (out of scope)
 
-1. À partir d'un TSV valide, la commande produit un dossier `dist/` ouvrable directement (double-clic sur `index.html` ou via serveur statique).
-2. Le graphe affiche taxons et molécules avec des styles distincts et les relations comme arêtes.
-3. **[V2]** Le diamètre des nœuds est borné (min/max) et le layout par défaut ne fait **pas se recouvrir les nœuds** (étiquettes comprises) : aucun nœud n'en masque un autre à l'issue du layout `fcose` sur l'exemple et sur un échantillon de 2 000 nœuds.
-4. Le clic sur un nœud affiche description, source et liens corrects.
-5. La recherche, les filtres et le changement de layout fonctionnent.
-6. Les nœuds ne sont pas dupliqués malgré la répétition des informations dans le TSV.
-7. Un TSV de 100 000 lignes se génère sans erreur et le site reste utilisable (mode exploration).
-8. Les exports PNG et JSON fonctionnent.
-9. **[V2]** Un indicateur d'attente est visible pendant les opérations longues (layout, recherche, expansion).
-10. **[V2]** À la sélection d'un nœud, les non-sélectionnés sont invisibles par défaut ; la case à cocher permet de les griser ou de désactiver le comportement.
-11. **[V2]** Une description contenant `<script>alert(1)</script>` s'affiche en texte brut, sans exécution.
-
-## 9. Extensions possibles (hors périmètre initial)
-
-- Hiérarchie taxonomique (liens parent/enfant NCBI) et regroupement de nœuds (compound nodes) par rang.
-- Hiérarchie ChEBI (`is_a`) entre molécules.
-- Statistiques (top taxons/molécules par degré) dans un onglet dédié.
-- Partage d'une vue par URL (hash encodant les filtres et la sélection).
-- Rang taxonomique et synonymes dans le panneau de détails.
-- Déploiement automatisé (GitHub Actions / GitLab CI) vers Pages.
-- Interface en anglais.
+- Taxonomic hierarchy (parent/child NCBI links) and compound nodes grouped by rank.
+- ChEBI hierarchy (`is_a`) between molecules.
+- Statistics (top taxa/molecules by degree) in a dedicated tab.
+- Shareable view via URL (hash encoding filters and selection).
+- Taxonomic rank and synonyms in the details panel.
+- Automated deployment (GitHub Actions / GitLab CI) to Pages.
+- Interface in English.

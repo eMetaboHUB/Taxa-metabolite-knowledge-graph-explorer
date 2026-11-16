@@ -113,6 +113,8 @@ With `--single-file`, everything is inlined into `dist/index.html` (plus
 Push the `dist/` folder (or serve it) to a static location. All paths are
 relative, so it works in a repository sub‑path.
 
+The live demo is available at https://emetabohub.github.io/Taxa-metabolite-knowledge-graph-explorer/
+
 ## Security
 
 - The Content‑Security‑Policy restricts sources (`default-src 'self'`) and forbids
