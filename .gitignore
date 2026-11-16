@@ -5,7 +5,6 @@ __pycache__/
 .venv/
 venv/
 
-# Sortie générée par build_site.py
 dist/
 
 # Données volumineuses / sources (régénérables)

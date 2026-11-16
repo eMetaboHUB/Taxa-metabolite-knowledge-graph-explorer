@@ -1,6 +1,6 @@
 # Spécifications : générateur de site statique Cytoscape.js (taxons ↔ molécules ChEBI)
 
-> Versions : v2 corrigée et complétée ; les ajouts/mofications majeurs depuis la v1 sont marqués **[V2]**, puis **[V3]**, **[V4]** et **[V5]** (dernière modification).
+> Versions : v2 corrigée et complétée ; les ajouts/modifications majeurs depuis la v1 sont marqués **[V2]**, puis **[V3]**, **[V4]** et **[V5]** (dernière modification).
 
 ## 1. Objectif
 
@@ -224,7 +224,7 @@ Le script doit être **idempotent** et **déterministe** (même entrée → mêm
 
 - `cytoscape` (version stable récente)
 - `cytoscape-fcose` (et ses dépendances `layout-base`, `cose-base`)
-- **$[V5]** Export **SVG** via `cytoscape-svg` : **optionnel et non embarqué par défaut** — l'application détecte son absence (`window.cytoscapeSvg`) et affiche un message d'information au lieu de l'export. S'il doit être fourni, l'ajouter dans `assets/vendor/` et le déclarer en dépendance. `cytoscape-popper` (infobulles) : optionnel, non embarqué.
+- **[V5]** Export **SVG** via `cytoscape-svg` : **optionnel et non embarqué par défaut** — l'application détecte son absence (`window.cytoscapeSvg`) et affiche un message d'information au lieu de l'export. S'il doit être fourni, l'ajouter dans `assets/vendor/` et le déclarer en dépendance. `cytoscape-popper` (infobulles) : optionnel, non embarqué.
 
 Les versions exactes sont notées dans un fichier `VENDOR.md` avec leurs licences (**[V2]** et les sommes de contrôle SHA-256 des fichiers).
 
