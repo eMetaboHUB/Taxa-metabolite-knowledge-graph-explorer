@@ -25,12 +25,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release download data-v1 --pattern "*.tsv"
-      # - run: pip install -r requirements.txt   # si nécessaire
+
       - name: Construire le site
-        run: python build_site.py   # adapte les arguments à ton script
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
+        run: |
+          python build_site.py \
+            --input forumLotusWInferrence.enriched.tsv \
+            --output dist
 
   deploy:
     needs: build
